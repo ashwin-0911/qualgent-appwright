@@ -1,0 +1,37 @@
+version: '3.8'
+
+services:
+
+  redis:
+    image: redis:alpine
+    ports:
+      - "6379:6379"
+
+  cli:
+    build:
+      context: ./cli
+    image: gjob
+    depends_on:
+      - backend
+    environment:
+      - REDIS_URL=redis://redis:6379
+
+  backend:
+    build: ./backend
+    ports:
+      - "8080:8080"
+    depends_on:
+      - redis
+    environment:
+      - REDIS_URL=redis://redis:6379
+      - IOS_APP_ID=bs://5461c4453b3be57b806b33235a1a1ec4389d4e46
+      - ANDROID_APP_ID=bs://471e96a57bc3b28b73ddbe9c08c146709b1fe2d8
+      - BROWSERSTACK_USERNAME=your_username
+      - BROWSERSTACK_ACCESS_KEY=your_key
+    volumes:
+      - ./backend/tests:/app/tests
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "3000:80"
